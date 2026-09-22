@@ -21,7 +21,7 @@ void Snake::eat(void) {
 	for (int i=0; i<(sizeX*sizeY); i++) if (matrix1[i] >= 2) matrix1[i]++;
 }
 
-Snake::Snake(int x, int y) {
+Snake::Snake(int x, int y, int spd, int food) {
 	sizeX = x;
 	sizeY = y;
 	matrix0 = new int[sizeY * sizeX];
@@ -29,6 +29,8 @@ Snake::Snake(int x, int y) {
 	direction = RIGHT;
 	length = LENGTH;
 	isAlive = 1;
+	speed = spd;
+	foodCount = food;
 }
 
 Snake::~Snake() {
@@ -54,7 +56,7 @@ void Snake::initMatrix(void) {
 	headY = sizeY / 2;
 	matrix1[convIndex(headX, headY)] = 1; // Snake head
 	for (int i=1; i<=length-1; i++) matrix1[convIndex(headX-i, headY)] = length - i + 1; // Body
-	for (int i=0; i<FOOD; i++) setFood(); // setFood() only works on matrix1
+	for (int i=0; i<foodCount; i++) setFood(); // setFood() only works on matrix1
 	shift(); // Initialize matrix1 and shift it into matrix0
 }
 
@@ -63,7 +65,7 @@ void Snake::show(void){
 	attrset(COLOR_PAIR(2));
 	mvprintw(0, 0, "Score: %d", length);
 	attrset(COLOR_PAIR(1));
-	mvprintw(0, 12, "Screen Size: %dx%d   Direction: %d", sizeX, sizeY, direction);
+	mvprintw(0, 12, "Speed: %d   Screen Size: %dx%d", speed, sizeX, sizeY);
 	for (int y=0; y<sizeY; y++) {
 		for (int x=0; x<sizeX; x++) {
 			int status = matrix0[convIndex(x, y)];
@@ -73,10 +75,10 @@ void Snake::show(void){
 				status == -2 ? '*' : // Food
 				status ==  1 ? '@' : // Head
 				status >=  2 ? 'o' : // Body
-				' ';
+				' '; // Empty
 			int colorId =
-				status == -1 ? 1 :
-				status == -2 ? 2 : 3;
+				status == -1 ? 1 :    // Wall
+				status == -2 ? 2 : 3; // Food, Body
 			attrset(COLOR_PAIR(colorId));
 			mvaddch(y + 1, x + MARGIN, character);
 		}
@@ -84,10 +86,11 @@ void Snake::show(void){
 	if (!isAlive) {
 		attrset(COLOR_PAIR(4));
 		// Paint the field white
-		for (int i=0; i<5; i++) mvprintw(sizeY / 2 - 1 + i, sizeX / 2 - 3, "                 ");
+		for (int i=0; i<5; i++) mvprintw(sizeY / 2 - 1 + i, sizeX / 2 - 4, "                   ");
 		mvprintw(sizeY / 2 + 0, sizeX / 2 - 1, "<<Game Over>>");
-		mvprintw(sizeY / 2 + 1, sizeX / 2 - 1, "   Score: %d ", length);
+		mvprintw(sizeY / 2 + 1, sizeX / 2 - 1, "  Score: %d  ", length);
 		mvprintw(sizeY / 2 + 2, sizeX / 2 - 1, " ^C to quit  ");
+		mvprintw(sizeY, sizeX + MARGIN + 1, ""); // Move cursor to bottom
 	}
 	refresh();
 }
@@ -110,7 +113,7 @@ void Snake::move(void) {
 					case DOWN:  nextX = x;     nextY = y + 1; break;
 					case LEFT:  nextX = x - 1; nextY = y;     break;
 					case RIGHT: nextX = x + 1; nextY = y;     break;
-					default: break;
+					default:    nextX = x;     nextY = y;     break; // Fallback
 				}
 				int nextStatus = matrix0[convIndex(nextX, nextY)];
 				if (nextStatus == -2) findFood = 1;
@@ -123,7 +126,7 @@ void Snake::move(void) {
 		}
 	}
 	if (findFood) {
-		eat(); // Call this after all scanning
+		eat(); // Call this after the all scanning
 		setFood();
 	}
 }

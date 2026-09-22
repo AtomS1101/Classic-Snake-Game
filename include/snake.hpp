@@ -9,11 +9,12 @@ private:
 	int* matrix0;
 	int* matrix1;
 	int isAlive;
+	int speed, foodCount;
 
 	void setFood(void);
 	void eat(void);
 public:
-	Snake(int x, int y);
+	Snake(int x, int y, int spd, int food);
 	~Snake(void);
 
 	void setDirection(int dir);
