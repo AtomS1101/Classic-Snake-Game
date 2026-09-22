@@ -7,3 +7,9 @@ You can simply compile using `makefile`:
 ```bash
 make
 ```
+
+## Usage
+
+```bash
+snake [-s speed] [-f food]
+```
