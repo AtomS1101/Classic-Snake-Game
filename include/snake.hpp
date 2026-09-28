@@ -11,7 +11,7 @@ private:
 	int isAlive;
 	int speed, foodCount;
 
-	void setFood(void);
+	void setItem(int type);
 	void eat(void);
 public:
 	Snake(int x, int y, int spd, int food);

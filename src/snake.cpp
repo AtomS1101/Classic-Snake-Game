@@ -4,13 +4,13 @@
 #include "../include/random.hpp"
 #include "../include/snake.hpp"
 
-void Snake::setFood(void) {
+void Snake::setItem(int type) {
 	int isOccupied = 0;
 	while (!isOccupied) {
 		int x = random(1, sizeX - 2);
 		int y = random(1, sizeY - 2);
 		if (matrix1[convIndex(x, y)] == 0) { // Empty
-			matrix1[convIndex(x, y)] = -2;
+			matrix1[convIndex(x, y)] = type;
 			isOccupied = 1;
 		}
 	}
@@ -56,7 +56,8 @@ void Snake::initMatrix(void) {
 	headY = sizeY / 2;
 	matrix1[convIndex(headX, headY)] = 1; // Snake head
 	for (int i=1; i<=length-1; i++) matrix1[convIndex(headX-i, headY)] = length - i + 1; // Body
-	for (int i=0; i<foodCount; i++) setFood(); // setFood() only works on matrix1
+	for (int i=0; i<foodCount; i++) setItem(-2); // setItem() only works on matrix1
+	for (int i=0; i<POISON; i++)    setItem(-3); // Set poison
 	shift(); // Initialize matrix1 and shift it into matrix0
 }
 
@@ -73,18 +74,21 @@ void Snake::show(void){
 			char character =
 				status == -1 ? '#' : // Wall
 				status == -2 ? '*' : // Food
+				status == -3 ? 'x' : // Poison
 				status ==  1 ? '@' : // Head
 				status >=  2 ? 'o' : // Body
 				' '; // Empty
 			int colorId =
-				status == -1 ? 1 :    // Wall
-				status == -2 ? 2 : 3; // Food, Body
+				status == -1 ? 1 : // Wall
+				status == -2 ? 2 : // Food
+				status == -3 ? 4 : // Poison
+				3; // Body
 			attrset(COLOR_PAIR(colorId));
 			mvaddch(y + 1, x + MARGIN, character);
 		}
 	}
 	if (!isAlive) {
-		attrset(COLOR_PAIR(4));
+		attrset(COLOR_PAIR(5));
 		// Paint the field white
 		for (int i=0; i<5; i++) mvprintw(sizeY / 2 - 1 + i, sizeX / 2 - 4, "                   ");
 		mvprintw(sizeY / 2 + 0, sizeX / 2 - 1, "<<Game Over>>");
@@ -117,7 +121,7 @@ void Snake::move(void) {
 				}
 				int nextStatus = matrix0[convIndex(nextX, nextY)];
 				if (nextStatus == -2) findFood = 1;
-				if (nextStatus >= 2 or nextStatus == -1) { isAlive = 0; return; } // Hit wall or self
+				if (nextStatus >= 2 || nextStatus == -1 || nextStatus == -3) { isAlive = 0; return; } // Hit wall or self
 				matrix1[convIndex(nextX, nextY)] = 1;
 			} else {
 				if (matrix1[convIndex(x, y)] == 1) continue; // Occupied by head
@@ -127,7 +131,11 @@ void Snake::move(void) {
 	}
 	if (findFood) {
 		eat(); // Call this after the all scanning
-		setFood();
+		setItem(-2);
+		if (!random(0, 2)) { // Replace poison
+			for (int i=0; i<(sizeX*sizeY); i++) if (matrix1[i] == -3) matrix1[i] = 0; // Clear poison
+			for (int i=0; i<POISON; i++) setItem(-3);
+		}
 	}
 }
 

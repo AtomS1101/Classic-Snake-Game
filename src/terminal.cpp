@@ -18,9 +18,10 @@ Terminal::Terminal(void) {
 	keypad(stdscr, TRUE);  // Arrow keys become KEY_UP, KEY_DOWN, ...
 	nodelay(stdscr, TRUE); // getch() returns ERR if no input
 	init_pair(1, COLOR_WHITE, -1);
-	init_pair(2, COLOR_RED, -1);
+	init_pair(2, COLOR_RED,   -1);
 	init_pair(3, COLOR_GREEN, -1);
-	init_pair(4, COLOR_RED, COLOR_WHITE);
+	init_pair(4, COLOR_BLUE,  -1);
+	init_pair(5, COLOR_RED, COLOR_WHITE);
 }
 
 Terminal::~Terminal(void) {
