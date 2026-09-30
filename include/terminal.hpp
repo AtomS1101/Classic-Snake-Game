@@ -1,6 +1,8 @@
 #pragma once
 
 class Terminal {
+private:
+	int x, y;
 public:
 	Terminal(void);
 	~Terminal(void);

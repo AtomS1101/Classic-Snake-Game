@@ -1,7 +1,6 @@
 #include <cstdlib>   // Provides exit()
 #include <ncurses.h> // Get Keyboard input and provide console io
 
-#include "../include/config.hpp"
 #include "../include/terminal.hpp"
 
 Terminal::Terminal(void) {
@@ -17,10 +16,11 @@ Terminal::Terminal(void) {
 	noecho();              // Don't echo typed keys
 	keypad(stdscr, TRUE);  // Arrow keys become KEY_UP, KEY_DOWN, ...
 	nodelay(stdscr, TRUE); // getch() returns ERR if no input
-	init_pair(1, COLOR_WHITE, -1);
-	init_pair(2, COLOR_RED, -1);
-	init_pair(3, COLOR_GREEN, -1);
-	init_pair(4, COLOR_RED, COLOR_WHITE);
+	init_pair(1, COLOR_WHITE, COLOR_BLACK);
+	init_pair(2, COLOR_RED,   COLOR_BLACK);
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);
+	init_pair(4, COLOR_BLUE,  COLOR_BLACK);
+	init_pair(5, COLOR_RED,   COLOR_WHITE);
 }
 
 Terminal::~Terminal(void) {
@@ -28,8 +28,7 @@ Terminal::~Terminal(void) {
 }
 
 void Terminal::getTerminalSize(int *cols, int *rows) {
-	int x, y;
 	getmaxyx(stdscr, y, x);
-	*cols = x - MARGIN*2;
-	*rows = y - 2;
+	*cols = x;
+	*rows = y;
 }

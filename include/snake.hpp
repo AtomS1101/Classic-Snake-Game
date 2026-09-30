@@ -2,17 +2,19 @@
 
 class Snake {
 private:
+	int actualX, actualY;
 	int sizeX, sizeY;
 	int headX, headY;
 	int direction;
 	int length;
 	int* matrix0;
 	int* matrix1;
-	int isAlive;
+	int gameOverState;
 	int speed, foodCount;
 
-	void setFood(void);
+	void setItem(int type);
 	void eat(void);
+	void gameOver(void);
 public:
 	Snake(int x, int y, int spd, int food);
 	~Snake(void);
