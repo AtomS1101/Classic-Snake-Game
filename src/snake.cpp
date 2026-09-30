@@ -1,4 +1,5 @@
 #include <ncurses.h> // Get Keyboard input and provide console io
+#include <string>
 
 #include "../include/config.hpp"
 #include "../include/random.hpp"
@@ -21,6 +22,21 @@ void Snake::eat(void) {
 	for (int i=0; i<(sizeX*sizeY); i++) if (matrix1[i] >= 2) matrix1[i]++;
 }
 
+void Snake::gameOver(void) {
+	attrset(COLOR_PAIR(5));
+	std::string message =
+		gameOverState == -1 ? "Bonk! Hit the wall." :
+		gameOverState == -3 ? " You ate poison... " :
+		                      "You ate yourself...";
+	for (int i=0; i<6; i++) // Paint the field white
+		mvprintw(sizeY / 2 - 2 + i, sizeX / 2 - 5, "                     ");
+	mvprintw(sizeY / 2 - 1, sizeX / 2 - 4, "  << Game Over >>  ");
+	mvprintw(sizeY / 2 + 0, sizeX / 2 - 4, message.c_str());
+	mvprintw(sizeY / 2 + 1, sizeX / 2 - 4, "     Score: %d     ", length);
+	mvprintw(sizeY / 2 + 2, sizeX / 2 - 4, "    ^C to quit     ");
+	mvprintw(sizeY, sizeX + MARGIN + 1, ""); // Move cursor to bottom
+}
+
 Snake::Snake(int x, int y, int spd, int food) {
 	actualX = x;
 	actualY = y;
@@ -30,7 +46,7 @@ Snake::Snake(int x, int y, int spd, int food) {
 	matrix1 = new int[sizeY * sizeX];
 	direction = RIGHT;
 	length = LENGTH;
-	isAlive = 1;
+	gameOverState = 0;
 	speed = spd;
 	foodCount = food;
 }
@@ -95,20 +111,12 @@ void Snake::show(void){
 			mvaddch(y + 1, x + MARGIN, character);
 		}
 	}
-	if (!isAlive) {
-		attrset(COLOR_PAIR(5));
-		// Paint the field white
-		for (int i=0; i<5; i++) mvprintw(sizeY / 2 - 1 + i, sizeX / 2 - 4, "                   ");
-		mvprintw(sizeY / 2 + 0, sizeX / 2 - 1, "<<Game Over>>");
-		mvprintw(sizeY / 2 + 1, sizeX / 2 - 1, "  Score: %d  ", length);
-		mvprintw(sizeY / 2 + 2, sizeX / 2 - 1, " ^C to quit  ");
-		mvprintw(sizeY, sizeX + MARGIN + 1, ""); // Move cursor to bottom
-	}
+	if (gameOverState) gameOver();
 	refresh();
 }
 
 void Snake::move(void) {
-	if (!isAlive) return;
+	if (gameOverState) return;
 	int findFood = 0;
 	for (int y=0; y<sizeY; y++) {
 		for (int x=0; x<sizeX; x++) {
@@ -129,7 +137,9 @@ void Snake::move(void) {
 				}
 				int nextStatus = matrix0[convIndex(nextX, nextY)];
 				if (nextStatus == -2) findFood = 1;
-				if (nextStatus >= 2 || nextStatus == -1 || nextStatus == -3) { isAlive = 0; return; } // Hit wall or self
+				if (nextStatus >= 2 || nextStatus == -1 || nextStatus == -3) { // Hit wall or self
+					gameOverState = nextStatus; return;
+				}
 				matrix1[convIndex(nextX, nextY)] = 1;
 			} else {
 				if (matrix1[convIndex(x, y)] == 1) continue; // Occupied by head
@@ -148,7 +158,7 @@ void Snake::move(void) {
 }
 
 void Snake::shift(void) {
-	if (!isAlive) return; // Keep field when dead
+	if (gameOverState) return; // Keep field when dead
 	for (int i=0; i<sizeX*sizeY; i++) matrix0[i] = matrix1[i];
 	delete[] matrix1;
 	matrix1 = new int[sizeX * sizeY];
