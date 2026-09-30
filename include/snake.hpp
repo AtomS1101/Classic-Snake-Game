@@ -2,6 +2,7 @@
 
 class Snake {
 private:
+	int actualX, actualY;
 	int sizeX, sizeY;
 	int headX, headY;
 	int direction;

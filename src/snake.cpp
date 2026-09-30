@@ -22,8 +22,10 @@ void Snake::eat(void) {
 }
 
 Snake::Snake(int x, int y, int spd, int food) {
-	sizeX = x;
-	sizeY = y;
+	actualX = x;
+	actualY = y;
+	sizeX = x - MARGIN*2;
+	sizeY = y - 2;
 	matrix0 = new int[sizeY * sizeX];
 	matrix1 = new int[sizeY * sizeX];
 	direction = RIGHT;
@@ -63,6 +65,12 @@ void Snake::initMatrix(void) {
 
 void Snake::show(void){
 	erase();
+	attrset(COLOR_PAIR(1));
+	for (int i=0; i<actualX; i++) {
+		for (int j=0; j<actualY; j++) {
+			mvaddch(j, i, ' ');
+		}
+	}
 	attrset(COLOR_PAIR(2));
 	mvprintw(0, 0, "Score: %d", length);
 	attrset(COLOR_PAIR(1));
@@ -74,7 +82,7 @@ void Snake::show(void){
 			char character =
 				status == -1 ? '#' : // Wall
 				status == -2 ? '*' : // Food
-				status == -3 ? 'x' : // Poison
+				status == -3 ? 'X' : // Poison
 				status ==  1 ? '@' : // Head
 				status >=  2 ? 'o' : // Body
 				' '; // Empty
